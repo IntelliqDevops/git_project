@@ -1,0 +1,185 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  labels:
+   app: db
+spec:
+  clusterIP: None
+  ports:
+   - targetPort: 3306
+     port: 80
+  selector:
+   app: db
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+ name: mysql-statefulset
+ labels:
+  app: db
+spec:
+  replicas: 2
+  serviceName: mysql
+  selector:
+   matchLabels:
+    app: db
+  template:
+    metadata:
+      name: mysql-pod
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: mydb
+          image: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: intelliqit
+          volumeMounts:
+           - name: mysql-volume
+             mountPath: /var/lib/mysql
+      volumes:
+       - name: mysql-volume
+         persistentVolumeClaim:
+          claimName: new-pvc
+... 
+
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  labels:
+   app: db
+spec:
+  clusterIP: None
+  ports:
+   - targetPort: 3306
+     port: 80
+  selector:
+   app: db
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+ name: mysql-statefulset
+ labels:
+  app: db
+spec:
+  replicas: 2
+  serviceName: mysql
+  selector:
+   matchLabels:
+    app: db
+  template:
+    metadata:
+      name: mysql-pod
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: mydb
+          image: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: intelliqit
+          volumeMounts:
+           - name: mysql-volume
+             mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+   - metadata:
+      name: mysql-volume
+     spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+       requests:
+        storage: 2Gi
+... 
+
+
+
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql-pod
+  labels:
+   app: db
+spec:
+  containers:
+    - name: mydb
+      image: mysql
+      env:
+       - name: MYSQL_ROOT_PASSWORD
+         value: intelliqit
+      volumeMounts:
+        - name: myvolume
+          mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+       name: myvolume
+      spec:
+       accessModes: ["readWriteOnce"]
+       resources: 
+         requests:
+           storage: 2Gi
+...
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+spec:
+  selector:
+    matchLabels:
+      name: jenkins
+  template:
+    metadata:
+      labels:
+        name: jenkins
+    spec:
+      containers:
+        - name: jenkins
+          image: jenkins/jenkins
+          resources:
+            requests:
+              cpu: 200m
+            limits:
+              cpu: 500m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+spec:
+  type: ClusterIP
+  ports:
+    - targetPort: 8080
+      port: 80
+  selector:
+    name: jenkins
+...
+
+
+To create a horrizontal pod autoscaller
+kubectl autoscale deployment php-apache --cpu-percent=50 --min=1 --max=10
+
+To see the list of hpa
+kubectl get hpa
+
+To put load on the php application
+kubectl run -i \
+    --tty load-generator \
+    --rm --image=busybox \
+    --restart=Never \
+    -- /bin/sh -c "while sleep 0.01; do wget -q -O- http://php-apache; done"
+
+To see the pods autoscalling
+kubectl get hpa php-apache --watch

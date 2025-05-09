@@ -1,0 +1,62 @@
+resource "aws_s3_bucket" "static_site" {
+  bucket = "my-website-11131"  # Change this to a unique name
+  force_destroy = true
+
+
+}
+
+esource "aws_s3_bucket_public_access_block" "public_access" {
+  bucket = aws_s3_bucket.static_site.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  restrict_public_buckets = false
+  ignore_public_acls      = false
+}
+
+resource "aws_s3_bucket_policy" "public_policy" {
+  bucket = aws_s3_bucket.static_site.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect    = "Allow",
+      Principal = "*",
+      Action    = "s3:GetObject",
+      Resource  = "${aws_s3_bucket.static_site.arn}/*"
+    }]
+  })
+}
+
+
+`Version`   | The version of the policy language. AWS recommends always using `"2012-10-17"`.                                                                                                                    
+`Statement` | A list of permissions being granted.                                                                                                                                                                 `Effect`    | `"Allow"` means the action is permitted. (Could also be `"Deny"` in other contexts.)                                                                                                               |
+| `Principal` | `"*"` means the permission is granted to **everyone** — no authentication needed.                                                                                                                   |
+| `Action`    | `"s3:GetObject"` allows **read access to individual objects** (like HTML, CSS, etc.).                                                                                                               |
+| `Resource`  | `"${aws_s3_bucket.static_site.arn}/*"` specifies **all objects** in this bucket. <br> It uses Terraform's interpolation to refer to the bucket's ARN and appends `/*` to match all items inside it. |
+
+ARN stands for resource name
+If bucket name is 
+my-static-website-123456
+then arn will be
+arn:aws:s3:::my-static-website-123456
+
+arn:aws:s3:::my-static-website-123456
+
+
+ https://awspolicygen.s3.amazonaws.com/policygen.html
+
+
+resource "aws_s3_object" "index" {
+  bucket = aws_s3_bucket.static_site.id
+  key    = "index.html"
+  source = "${path.module}/index.html"
+  content_type = "text/html"
+}
+
+resource "aws_s3_object" "error" {
+  bucket = aws_s3_bucket.static_site.id
+  key    = "error.html"
+  source = "${path.module}/error.html"
+  content_type = "text/html"
+}
