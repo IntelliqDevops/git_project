@@ -1,0 +1,85 @@
+
+
+Setup of Jenkins for CI-CD
+==================================
+1 Create 3 Ubuntu servers on aws cloud and name them as jenkinsserver,qaserver,prodserver
+
+2 Connect to Jenkinserver
+
+3 Update the apt repository
+  sudo apt-get update
+
+4 Install java
+  sudo apt-get install -y openjdk-17-jdk
+
+5 Install git and maven
+  sudo apt-get install -y git maven
+
+6 Download Jenkins.war
+  wget https://get.jenkins.io/war-stable/2.504.1/jenkins.war
+
+7 To stat jenkins
+  java -jar jenkins.war
+
+8 To access jenkins from browser
+  public_ip_of_jenkinsserver:8080
+
+9 Unlock jenkins by entering the admin password
+
+10 CLick on Install suggeseted plugins
+
+11 Create First admin user
+
+12 Click n save and Finish
+
+==================================================================
+Setup of tomcat on qa and prodservers
+===============================================
+1 Connect to the qaserver
+
+2 Update the apt repository
+  sudo apt-get update
+
+3 Install tomcat10
+  sudo apt-get install -y tomcat10
+
+5 Install tomcat10-admin
+  sudo apt-get install -y tomcat10-admin
+Repeat the above 5 steps on Prodservers
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
